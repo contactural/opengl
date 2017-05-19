@@ -49,14 +49,26 @@ void MeGlWindow::paintGL()
 	glViewport(0, 0, width(), height());
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	vec3 dominatingColor(0.0f,1.0f,0.0f);
+	vec3 dominatingColor(1.0f,0.0f,0.0f);
 	GLint dominatingColorUniformLocation = glGetUniformLocation(programID, "dominatingColor");
-	glUniform3fv(dominatingColorUniformLocation, 1, &dominatingColor[0]);
+	GLint yFlipUniformLocation = glGetUniformLocation(programID, "yFlip");
 	
+	glUniform3fv(dominatingColorUniformLocation, 1, &dominatingColor[0]);
+	glUniform1f(yFlipUniformLocation, 1.0f);
 	/*Draw triangle using vertices*/
 	//glDrawArrays(GL_TRIANGLES, 0, NUM_VERTICES_PER_TRI);
 	/*Draw triangle using indices*/
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+
+	dominatingColor.r = 0;
+	dominatingColor.b = 1;
+	glUniform3fv(dominatingColorUniformLocation, 1, &dominatingColor[0]);
+	glUniform1f(yFlipUniformLocation, -1.0f);
+	/*Draw triangle using vertices*/
+	//glDrawArrays(GL_TRIANGLES, 0, NUM_VERTICES_PER_TRI);
+	/*Draw triangle using indices*/
+	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+
 }
 bool checkStatus(
 	GLuint objectID,
