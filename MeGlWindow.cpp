@@ -9,7 +9,10 @@
 #include <ShapeGenerator.h>
 
 using namespace std;
+using glm::vec3;
+
 const GLuint NUM_VERTICES_PER_TRI = 3;
+GLuint programID;
 
 void sendDataToOpenGL()
 {
@@ -45,11 +48,27 @@ void MeGlWindow::paintGL()
 
 	glViewport(0, 0, width(), height());
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+	vec3 dominatingColor(1.0f,0.0f,0.0f);
+	GLint dominatingColorUniformLocation = glGetUniformLocation(programID, "dominatingColor");
+	GLint yFlipUniformLocation = glGetUniformLocation(programID, "yFlip");
 	
+	glUniform3fv(dominatingColorUniformLocation, 1, &dominatingColor[0]);
+	glUniform1f(yFlipUniformLocation, 1.0f);
 	/*Draw triangle using vertices*/
 	//glDrawArrays(GL_TRIANGLES, 0, NUM_VERTICES_PER_TRI);
 	/*Draw triangle using indices*/
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+
+	dominatingColor.r = 0;
+	dominatingColor.b = 1;
+	glUniform3fv(dominatingColorUniformLocation, 1, &dominatingColor[0]);
+	glUniform1f(yFlipUniformLocation, -1.0f);
+	/*Draw triangle using vertices*/
+	//glDrawArrays(GL_TRIANGLES, 0, NUM_VERTICES_PER_TRI);
+	/*Draw triangle using indices*/
+	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+
 }
 bool checkStatus(
 	GLuint objectID,
@@ -180,7 +199,7 @@ void installShaders()
 	if (!checkShaderStatus(vertexShaderID) || !checkShaderStatus(fragmentShaderID))
 		return;
 
-	GLuint programID = glCreateProgram();
+	programID = glCreateProgram();
 
 	glAttachShader(programID, vertexShaderID);
 	glAttachShader(programID, fragmentShaderID);
