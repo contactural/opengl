@@ -5,23 +5,26 @@
 #include <iostream>
 #include <fstream>
 #include <glm\glm.hpp>
+#include <glm\gtc\matrix_transform.hpp>
 #include <Vertex.h>
 #include <ShapeGenerator.h>
 
 using namespace std;
 using glm::vec3;
+using glm::mat4;
 
 const GLuint NUM_VERTICES_PER_TRI = 3;
 GLuint programID;
+GLuint numIndices;
 
 void sendDataToOpenGL()
 {
-	ShapeData tri = ShapeGenerator::makeTriangle();
+	ShapeData shape = ShapeGenerator::makeCube();
 
 	GLuint vertexBufferID;
 	glGenBuffers(1, &vertexBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-	glBufferData(GL_ARRAY_BUFFER, tri.vertexBufferSize(), tri.vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, shape.vertexBufferSize(), shape.vertices, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GL_FLOAT) * 6, 0);
@@ -33,10 +36,12 @@ void sendDataToOpenGL()
 	GLuint indexBufferID;
 	glGenBuffers(1, &indexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, tri.indexBufferSize(),
-		tri.indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape.indexBufferSize(),
+		shape.indices, GL_STATIC_DRAW);
 
-	tri.cleanup();
+	numIndices = shape.numIndices;
+
+	shape.cleanup();
 
 }
 
@@ -49,25 +54,20 @@ void MeGlWindow::paintGL()
 	glViewport(0, 0, width(), height());
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	vec3 dominatingColor(1.0f,0.0f,0.0f);
-	GLint dominatingColorUniformLocation = glGetUniformLocation(programID, "dominatingColor");
-	GLint yFlipUniformLocation = glGetUniformLocation(programID, "yFlip");
-	
-	glUniform3fv(dominatingColorUniformLocation, 1, &dominatingColor[0]);
-	glUniform1f(yFlipUniformLocation, 1.0f);
-	/*Draw triangle using vertices*/
-	//glDrawArrays(GL_TRIANGLES, 0, NUM_VERTICES_PER_TRI);
-	/*Draw triangle using indices*/
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+	mat4 modelTransformMatrix = glm::translate(mat4(), vec3(0.0f, 0.0f, -3.0f));
+	mat4 projectionMatrix = glm::perspective(60.0f, ((float)width()/height()),0.1f, 10.0f );
 
-	dominatingColor.r = 0;
-	dominatingColor.b = 1;
-	glUniform3fv(dominatingColorUniformLocation, 1, &dominatingColor[0]);
-	glUniform1f(yFlipUniformLocation, -1.0f);
-	/*Draw triangle using vertices*/
-	//glDrawArrays(GL_TRIANGLES, 0, NUM_VERTICES_PER_TRI);
-	/*Draw triangle using indices*/
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+	GLint modelTransformMatrixUniformLocation =
+		glGetUniformLocation(programID, "modelTransformMatrix");
+	GLint projectionMatrixUniformLocation =
+		glGetUniformLocation(programID, "projectionMatrix");
+
+	glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1,
+		GL_FALSE, &modelTransformMatrix[0][0]);
+	glUniformMatrix4fv(projectionMatrixUniformLocation, 1,
+		GL_FALSE, &projectionMatrix[0][0]);
+
+	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
 
 }
 bool checkStatus(
