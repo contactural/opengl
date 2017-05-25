@@ -54,6 +54,8 @@ void MeGlWindow::paintGL()
 	glViewport(0, 0, width(), height());
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
+	// projection * translation * rotation * vertex
+
 	mat4 projectionMatrix	= glm::perspective(60.0f, ((float)width() / height()), 0.1f, 10.0f);
 	mat4 projectiontranslationMatrix = glm::translate(projectionMatrix, vec3(0.0f, 0.0f, -3.0f));
 	mat4 fullTransformMatrix = glm::rotate(projectiontranslationMatrix, 54.0f, vec3(1.0f, 0.0f, 0.0f));
@@ -206,9 +208,12 @@ void installShaders()
 	glBindAttribLocation(programID, 1, "vertexColor");
 
 	glLinkProgram(programID);
-	
+
 	if (!checkProgramStatus(programID))
 		return;
+
+	glDeleteShader(vertexShaderID);
+	glDeleteShader(fragmentShaderID);
 
 	glUseProgram(programID);
 
@@ -224,4 +229,10 @@ void MeGlWindow::initializeGL()
 	sendDataToOpenGL();
 	installShaders();
 
+}
+
+MeGlWindow::~MeGlWindow()
+{
+	glUseProgram(0);
+	glDeleteProgram(programID);
 }
