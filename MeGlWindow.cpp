@@ -6,6 +6,7 @@
 #include <fstream>
 #include <glm\glm.hpp>
 #include <glm\gtc\matrix_transform.hpp>
+#include <glm\gtx\transform.hpp>
 #include <Vertex.h>
 #include <ShapeGenerator.h>
 
@@ -57,8 +58,10 @@ void MeGlWindow::paintGL()
 	// projection * translation * rotation * vertex
 
 	mat4 projectionMatrix	= glm::perspective(60.0f, ((float)width() / height()), 0.1f, 10.0f);
-	mat4 projectiontranslationMatrix = glm::translate(projectionMatrix, vec3(0.0f, 0.0f, -3.0f));
-	mat4 fullTransformMatrix = glm::rotate(projectiontranslationMatrix, 54.0f, vec3(1.0f, 0.0f, 0.0f));
+	mat4 translationMatrix = glm::translate(vec3(0.0f, 0.0f, -3.0f));
+	mat4 rotationMatrix = glm::rotate(54.0f, vec3(1.0f, 0.0f, 0.0f));
+
+	mat4 fullTransformMatrix = projectionMatrix * translationMatrix * rotationMatrix;
 
 	GLint fullTransformMatrixUniformLocation =
 		glGetUniformLocation(programID, "fullTransformMatrix");
