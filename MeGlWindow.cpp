@@ -57,19 +57,32 @@ void MeGlWindow::paintGL()
 
 	// projection * translation * rotation * vertex
 
-	mat4 projectionMatrix	= glm::perspective(60.0f, ((float)width() / height()), 0.1f, 10.0f);
-	mat4 translationMatrix = glm::translate(vec3(0.0f, 0.0f, -3.0f));
-	mat4 rotationMatrix = glm::rotate(54.0f, vec3(1.0f, 0.0f, 0.0f));
-
-	mat4 fullTransformMatrix = projectionMatrix * translationMatrix * rotationMatrix;
-
 	GLint fullTransformMatrixUniformLocation =
 		glGetUniformLocation(programID, "fullTransformMatrix");
 
+	mat4 fullTransformMatrix;
+	mat4 projectionMatrix	= glm::perspective(60.0f, ((float)width() / height()), 0.1f, 10.0f);
+
+	//Cube 1
+	mat4 translationMatrix = glm::translate(vec3(-1.0f, 0.0f, -3.0f));
+	mat4 rotationMatrix = glm::rotate(36.0f, vec3(1.0f, 0.0f, 0.0f));
+
+	fullTransformMatrix = projectionMatrix * translationMatrix * rotationMatrix;
+
 	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1,
 		GL_FALSE, &fullTransformMatrix[0][0]);
-
 	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
+
+	//Cube 2
+	translationMatrix = glm::translate(vec3(1.0f, 0.0f, -3.75f));
+	rotationMatrix = glm::rotate(126.0f, vec3(0.0f, 1.0f, 0.0f));
+
+	fullTransformMatrix = projectionMatrix * translationMatrix * rotationMatrix;
+
+	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1,
+		GL_FALSE, &fullTransformMatrix[0][0]);
+	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
+
 
 }
 bool checkStatus(
