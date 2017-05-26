@@ -3,14 +3,14 @@
 /*"in layout(location=0) vec2 position;"*/
 attribute vec3 vPosition;
 attribute vec3 vertexColor;
-uniform vec3 dominatingColor;
-uniform float yFlip;
+
+uniform mat4 fullTransformMatrix;
 
 out vec3 theColor;
 void main()
 {
-	gl_Position = vec4(vPosition ,1.0 );
-	gl_Position.y = gl_Position.y * yFlip;
-/*"gl_Position = vPosition;"*/
-	theColor = dominatingColor;
+	vec4 v = vec4(vPosition ,1.0 );
+	gl_Position = fullTransformMatrix * v;
+
+	theColor = vertexColor;
 }
