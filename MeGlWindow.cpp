@@ -20,6 +20,7 @@ GLuint numIndices;
 
 void sendDataToOpenGL()
 {
+#if 0
 	ShapeData shape = ShapeGenerator::makeCube();
 
 	GLuint vertexBufferID;
@@ -33,7 +34,7 @@ void sendDataToOpenGL()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GL_FLOAT) * 6, (char*)(sizeof(GL_FLOAT) * 3));
 
-	
+
 	GLuint indexBufferID;
 	glGenBuffers(1, &indexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
@@ -43,6 +44,42 @@ void sendDataToOpenGL()
 	numIndices = shape.numIndices;
 
 	shape.cleanup();
+
+#endif
+
+	GLfloat tri[] = {
+		-1.0f, +0.0f,
+		-1.0f, +1.0f,
+		-0.9f, +0.0f
+	};
+
+	GLuint vertexBufferID;
+	glGenBuffers(1, &vertexBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(tri), tri, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+	GLfloat offsets[] = { 0.0f, 0.5f, 1.0f, 1.2f, 1.6f };
+	GLuint offsetsBufferID;
+	
+	glGenBuffers(1, &offsetsBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, offsetsBufferID);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(offsets), offsets, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribDivisor(1,1);
+
+	GLushort indices[] = { 0, 1, 2 };
+
+	GLuint indexBufferID;
+	glGenBuffers(1, &indexBufferID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(indices),
+		indices, GL_STATIC_DRAW);
+
+	numIndices = 3;
 
 }
 
@@ -55,6 +92,7 @@ void MeGlWindow::paintGL()
 	glViewport(0, 0, width(), height());
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
+#if 0
 	// projection * translation * rotation * vertex
 
 	GLint fullTransformMatrixUniformLocation =
@@ -82,7 +120,9 @@ void MeGlWindow::paintGL()
 	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1,
 		GL_FALSE, &fullTransformMatrix[0][0]);
 	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
-
+#endif
+	
+	glDrawElementsInstancedARB(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0, 5);
 
 }
 bool checkStatus(
@@ -241,6 +281,7 @@ void MeGlWindow::initializeGL()
 	glEnable(GL_DEPTH_TEST);
 
 	printf("GL Shading language version %s \n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	printf("GL Extensions %s \n", glGetString(GL_EXTENSIONS));
 
 	sendDataToOpenGL();
 	installShaders();
